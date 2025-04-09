@@ -15,8 +15,11 @@ import logging
 
 load_dotenv()
 
-# Configure the root logger
-logging.basicConfig(level=logging.INFO)
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,  # Set log level to INFO (change to DEBUG for more detailed logs)
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 

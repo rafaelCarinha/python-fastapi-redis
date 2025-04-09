@@ -1,5 +1,5 @@
 import asyncio
-from bittensor.subtensor import Subtensor
+from bittensor.core.subtensor import Subtensor
 
 
 async def fetch_tao_dividends(netuid: int, hotkey: str):

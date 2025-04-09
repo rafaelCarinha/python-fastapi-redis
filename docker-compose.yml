@@ -1,19 +1,18 @@
-version: "3.9"
 services:
   app:
     build: .
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
     environment:
-      AUTH_TOKEN: "your_token"
+      AUTH_TOKEN: "your_bearer_token"
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
       - redis
   worker:
     build: .
-    command: celery -A worker.celery_app worker --loglevel=info
+    command: celery -A app.services.sentiment_based_staking_task worker --loglevel=info
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379

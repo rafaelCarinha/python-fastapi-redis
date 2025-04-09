@@ -5,31 +5,50 @@ from redis import Redis
 from celery.result import AsyncResult
 import os
 import json
-from worker import celery_app
-from tao_staking_service import fetch_tao_dividends
-from cache_utilities import get_cached_data, set_cache
+from  app.services.sentiment_based_staking_task import celery_app
+from app.services.tao_staking_service import fetch_tao_dividends
+from app.services.cache_utilities import get_cached_data, set_cache
+
+from dotenv import load_dotenv
+import logging
+
+
+load_dotenv()
+
+# Configure the root logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 # Initialize FastAPI application
 app = FastAPI(title="Asynchronous Dividends API")
 redis_client = Redis(
-    host=os.getenv("REDIS_HOST", "localhost"),
-    port=int(os.getenv("REDIS_PORT", 6379))
+    host=os.environ.get("REDIS_HOST"),
+    port=int(os.environ.get("REDIS_PORT"))
 )
 
 # Bearer token authentication
 security = HTTPBearer()
 
 
+@app.get("/")
+async def root():
+    logger.info("Hello World Test")
+    return {"message": "Hello World Test"}
+
+
 @app.get("/api/v1/tao_dividends")
 async def tao_dividends(
-        netuid: int = Query(os.getenv("DEFAULT_NETUID"), description="Netuid of the blockchain"),
-        hotkey: str = Query(os.getenv("DEFAULT_HOTKEY"),
+        netuid: int = Query(os.environ.get("DEFAULT_NETUID"), description="Netuid of the blockchain"),
+        hotkey: str = Query(os.environ.get("DEFAULT_HOTKEY"),
                             description="Hotkey for the account"),
         trade: bool = Query(False, description="Trigger sentimental staking"),
         token: HTTPAuthorizationCredentials = Depends(security),
 ):
     # Validate Bearer Token
-    if token.credentials != os.getenv("AUTH_TOKEN", "your_bearer_token"):
+    logger.info(os.environ.get("AUTH_TOKEN"))
+    if token.credentials != os.environ.get("AUTH_TOKEN"):
+        print('Not Authenticated')
         raise HTTPException(status_code=401, detail="Invalid or missing token")
 
     # Check cache
@@ -41,7 +60,7 @@ async def tao_dividends(
     # Query Tao Dividends & Cache
     try:
         dividends = await fetch_tao_dividends(netuid, hotkey)
-        cache_ttl = int(os.getenv("CACHE_TTL", 120))
+        cache_ttl = int(os.environ.get("CACHE_TTL"))
         set_cache(redis_client, cache_key, dividends, ttl=cache_ttl)
 
         # Trigger sentiment tasks if trade=True
@@ -51,4 +70,5 @@ async def tao_dividends(
 
         return {"cached": False, "data": dividends}
     except Exception as e:
+        logger.info(str(e))
         raise HTTPException(status_code=500, detail=str(e))

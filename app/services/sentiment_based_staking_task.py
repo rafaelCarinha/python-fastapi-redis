@@ -1,6 +1,6 @@
 from celery import Celery
-from services.async_blockchain import fetch_tao_dividends, stake_tao, unstake_tao
-from services.sentiment_analysis import analyze_sentiment
+from app.services.tao_staking_service import fetch_tao_dividends, stake_tao, unstake_tao
+from app.services.sentiment_analysis_service import analyze_sentiment
 
 celery_app = Celery(
     "tasks",

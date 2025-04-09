@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  app:
+    build: .
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      AUTH_TOKEN: "your_token"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+  worker:
+    build: .
+    command: celery -A worker.celery_app worker --loglevel=info
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+  redis:
+    image: redis:6.2
+    ports:
+      - "6379:6379"# Multi-container setup configuration

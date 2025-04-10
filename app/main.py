@@ -6,7 +6,7 @@ from celery.result import AsyncResult
 import os
 import json
 from  app.services.sentiment_based_staking_task import celery_app
-from app.services.tao_staking_service import fetch_tao_dividends
+from app.services.tao_staking_service import fetch_tao_dividends, fetch_all_netuids, fetch_all_hotkeys_for_netuid
 from app.services.cache_utilities import get_cached_data, set_cache
 
 from dotenv import load_dotenv
@@ -38,40 +38,69 @@ security = HTTPBearer()
 async def root():
     logger.info("Hello World Test")
     return {"message": "Hello World Test"}
-
-
 @app.get("/api/v1/tao_dividends")
 async def tao_dividends(
-        netuid: int = Query(os.environ.get("DEFAULT_NETUID"), description="Netuid of the blockchain"),
-        hotkey: str = Query(os.environ.get("DEFAULT_HOTKEY"),
-                            description="Hotkey for the account"),
-        trade: bool = Query(False, description="Trigger sentimental staking"),
+        netuid: int | None = None,
+        hotkey: str | None = None,
+        trade: bool = False,
         token: HTTPAuthorizationCredentials = Depends(security),
 ):
     # Validate Bearer Token
-    logger.info(os.environ.get("AUTH_TOKEN"))
+    logger.info("Validating the authorization token.")
     if token.credentials != os.environ.get("AUTH_TOKEN"):
-        print('Not Authenticated')
         raise HTTPException(status_code=401, detail="Invalid or missing token")
 
-    # Check cache
-    cache_key = f"{netuid}:{hotkey}"
-    cached_data = get_cached_data(redis_client, cache_key)
-    if cached_data:
-        return {"cached": True, "data": cached_data}
-
-    # Query Tao Dividends & Cache
     try:
+        # Case 1: netuid is omitted, fetch all netuids and their hotkeys
+        if netuid is None:
+            logger.info("No netuid specified. Retrieving dividends for all netuids and hotkeys.")
+
+            all_dividends = await fetch_all_netuids()
+            return {"cached": False, "data": all_dividends}
+
+        # Case 2: hotkey is omitted, fetch all hotkeys for the specified netuid
+        if hotkey is None:
+            logger.info("No hotkey specified. Retrieving dividends for all hotkeys under netuid=%s.", netuid)
+
+            dividends_for_netuid = await fetch_all_hotkeys_for_netuid(netuid)
+            return {"cached": False, "data": dividends_for_netuid}
+
+        # Case 3: Both netuid and hotkey are specified
+        logger.info(
+            "Fetching dividends for netuid=%s and hotkey=%s.",
+            netuid,
+            hotkey
+        )
+        cache_key = f"{netuid}:{hotkey}"
+        cached_data = get_cached_data(redis_client, cache_key)
+        if cached_data:
+            logger.info(
+                "Cache hit for key: %s. Returning cached data with Cache status: True",
+                cache_key,
+            )
+            return {"cached": True, "data": cached_data}
+
+        # Fetch dividends and store in cache
         dividends = await fetch_tao_dividends(netuid, hotkey)
-        cache_ttl = int(os.environ.get("CACHE_TTL"))
+        cache_ttl = int(os.environ.get("CACHE_TTL", 3600))  # Default TTL if not set
         set_cache(redis_client, cache_key, dividends, ttl=cache_ttl)
 
-        # Trigger sentiment tasks if trade=True
+        # Optionally trigger a task if trade=True
         if trade:
+            logger.info(
+                "Trade flag is True. Triggering sentiment analysis task for netuid=%s, hotkey=%s.",
+                netuid, hotkey,
+            )
             task = celery_app.send_task("tasks.analyze_sentiment_and_execute", args=(netuid, hotkey))
+            logger.info("Sentiment analysis task successfully triggered. Task ID: %s", task.id)
+
             return {"cached": False, "data": dividends, "task_id": task.id}
 
         return {"cached": False, "data": dividends}
+
     except Exception as e:
-        logger.info(str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(
+            "An error occurred while processing the request: %s", str(e),
+            exc_info=True
+        )
+        raise HTTPException(status_code=500, detail="An unexpected error occurred.")

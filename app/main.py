@@ -82,7 +82,7 @@ async def tao_dividends(
 
         # Fetch dividends and store in cache
         dividends = await fetch_tao_dividends(netuid, hotkey)
-        cache_ttl = int(os.environ.get("CACHE_TTL", 3600))  # Default TTL if not set
+        cache_ttl = int(os.environ.get("CACHE_TTL"))  # Default TTL if not set
         set_cache(redis_client, cache_key, dividends, ttl=cache_ttl)
 
         # Optionally trigger a task if trade=True
@@ -91,7 +91,7 @@ async def tao_dividends(
                 "Trade flag is True. Triggering sentiment analysis task for netuid=%s, hotkey=%s.",
                 netuid, hotkey,
             )
-            task = celery_app.send_task("tasks.analyze_sentiment_and_execute", args=(netuid, hotkey))
+            task = celery_app.send_task("app.services.sentiment_based_staking_task.analyze_sentiment_and_execute", args=(netuid, hotkey))
             logger.info("Sentiment analysis task successfully triggered. Task ID: %s", task.id)
 
             return {"cached": False, "data": dividends, "task_id": task.id}

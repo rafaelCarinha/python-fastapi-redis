@@ -10,7 +10,7 @@ load_dotenv()
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,  # Set log level to INFO (change to DEBUG for more detailed logs)
+    level=logging.DEBUG,  # Set log level to INFO (change to DEBUG for more detailed logs)
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)

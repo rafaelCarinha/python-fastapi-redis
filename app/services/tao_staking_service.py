@@ -6,6 +6,7 @@ from bittensor.core.subtensor import Subtensor
 
 import logging
 
+from bittensor.utils.balance import check_and_convert_to_balance
 from bittensor_wallet import Wallet
 from bittensor_wallet.utils import SS58_FORMAT
 from dotenv import load_dotenv
@@ -176,11 +177,30 @@ async def fetch_all_hotkeys_for_netuid(netuid: int):
     return results
 
 # Function to stake Tao
-async def stake_tao(hotkey: str, netuid: int, amount: float):
+def stake_tao(hotkey: str, netuid: int, amount: float):
+    """Async function to stake Tao for a specific hotkey and netuid."""
     logger.info(f"Staking Tao: {amount} for hotkey: {hotkey} on netuid: {netuid}")
     try:
-        subtensor = Subtensor(network="nakamoto")
-        result = await subtensor.async_stake_hotkey_on_subnet(netuid=netuid, hotkey=hotkey, amount=amount)
+        # Validate and convert the amount to balance
+        amount = check_and_convert_to_balance(amount)
+
+        # Initialize the wallet using the provided hotkey
+        wallet = Wallet(name="default", path="~/.bittensor/wallets")
+
+        # Initialize Subtensor with the correct WebSocket endpoint
+        subtensor = Subtensor(network="wss://entrypoint-finney.opentensor.ai:443")
+        # Perform the async staking operation
+        result = subtensor.add_stake(
+            wallet= wallet,
+            netuid=netuid,
+            hotkey_ss58=hotkey,
+            amount=amount,
+            wait_for_inclusion= True,
+            wait_for_finalization= False,
+            safe_staking= False,
+            allow_partial_stake = False,
+            rate_tolerance= 0.005,
+        )
         logger.info(f"Successfully staked Tao: {amount} for hotkey: {hotkey} on netuid: {netuid}")
         return result
     except Exception as e:
@@ -189,11 +209,30 @@ async def stake_tao(hotkey: str, netuid: int, amount: float):
 
 
 # Function to unstake Tao
-async def unstake_tao(hotkey: str, netuid: int, amount: float):
+def unstake_tao(hotkey: str, netuid: int, amount: float):
+    """Async function to unstake Tao for a specific hotkey and netuid."""
     logger.info(f"Unstaking Tao: {amount} for hotkey: {hotkey} on netuid: {netuid}")
     try:
-        subtensor = Subtensor(network="nakamoto")
-        result = await subtensor.async_unstake_hotkey_on_subnet(netuid=netuid, hotkey=hotkey, amount=amount)
+        # Validate and convert the amount to balance
+        amount = check_and_convert_to_balance(amount)
+
+        # Initialize the wallet using the provided hotkey
+        wallet = Wallet(name="default", path="~/.bittensor/wallets")
+
+        # Initialize Subtensor with the correct WebSocket endpoint
+        subtensor = Subtensor(network="wss://entrypoint-finney.opentensor.ai:443")
+        # Perform the async unstaking operation
+        result = subtensor.unstake(
+            wallet= wallet,
+            netuid=netuid,
+            hotkey_ss58=hotkey,
+            amount=amount,
+            wait_for_inclusion= True,
+            wait_for_finalization= False,
+            safe_staking= False,
+            allow_partial_stake = False,
+            rate_tolerance= 0.005,
+        )
         logger.info(f"Successfully unstaked Tao: {amount} for hotkey: {hotkey} on netuid: {netuid}")
         return result
     except Exception as e:

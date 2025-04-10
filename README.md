@@ -39,7 +39,7 @@ Be sure to replace the placeholders with actual values when deploying or running
 ```pip install bittensor-cli==9.1.0```
 
 ## Create a New Wallet
-```btcli new_wallet --wallet_name=default```
+```btcli wallet new_coldkey --wallet.name default```
 
 ## Install Pytest
 ```uv add pytest pytest-asyncio httpx```

@@ -10,6 +10,8 @@ from app.db.mongo_persistence import persist_request_data
 
 from dotenv import load_dotenv
 import logging
+from datetime import datetime
+
 
 load_dotenv()
 
@@ -48,7 +50,9 @@ async def tao_dividends(
         "netuid": netuid,
         "hotkey": hotkey,
         "trade": trade,
-        "method": "GET"
+        "method": "GET",
+        "timestamp": datetime.utcnow().isoformat()
+
     }
 
     try:
@@ -96,7 +100,7 @@ async def tao_dividends(
                 "Trade flag is True. Triggering sentiment analysis task for netuid=%s, hotkey=%s.",
                 netuid, hotkey,
             )
-            task = celery_app.send_task("app.services.sentiment_based_staking_task.analyze_sentiment_and_execute",
+            task = celery_app.send_task("app.task.sentiment_based_staking_task.analyze_sentiment_and_execute",
                                         args=(netuid, hotkey))
             logger.info("Sentiment analysis task successfully triggered. Task ID: %s", task.id)
 

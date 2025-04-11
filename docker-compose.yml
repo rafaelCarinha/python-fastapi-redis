@@ -14,7 +14,7 @@ services:
       - mongo
   worker:
     build: .
-    command: celery -A app.services.sentiment_based_staking_task worker --loglevel=debug
+    command: celery -A app.task.sentiment_based_staking_task worker --loglevel=debug
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379

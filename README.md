@@ -104,3 +104,5 @@ use db
 db.sentiment_collection.find()
 ```
 
+## Fast API Request Docs
+http://localhost:8000/docs

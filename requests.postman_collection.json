@@ -1,0 +1,56 @@
+{
+	"info": {
+		"_postman_id": "2f9d14c0-e7b5-45bd-abe7-1cf203677f90",
+		"name": "New Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11499389",
+		"_collection_link": "https://slickcomp.postman.co/workspace/SlickComp-Workspace~8dbeeeae-fdf4-4224-bbf5-da63ac0c5183/collection/11257844-2f9d14c0-e7b5-45bd-abe7-1cf203677f90?action=share&source=collection_link&creator=11499389"
+	},
+	"item": [
+		{
+			"name": "New Request",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "your_bearer_token",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/api/v1/tao_dividends?netuid=18&hotkey=5FFApaS75bv5pJHfAp2FVLBj9ZaXuFDjEypsaBNc1wCfe52v&trade=False",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"tao_dividends"
+					],
+					"query": [
+						{
+							"key": "netuid",
+							"value": "18"
+						},
+						{
+							"key": "hotkey",
+							"value": "5FFApaS75bv5pJHfAp2FVLBj9ZaXuFDjEypsaBNc1wCfe52v"
+						},
+						{
+							"key": "trade",
+							"value": "False"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

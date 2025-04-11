@@ -14,14 +14,10 @@ Stores task execution results, sentiment data, operation type (stake/unstake), a
 - **Logging and Monitoring:**
 Logs detailed execution information, error reports, and state changes using standard Python logging, facilitating easier debugging, operational monitoring, and maintenance.
 
-
 ## Environment Variables
-
 ### Example `.env` File
-
 Below is an example of how these variables can be stored in a `.env` file:
-
-```bash
+``` bash
 DATURA_API_KEY=
 CHUTES_API_KEY=
 
@@ -39,50 +35,72 @@ CACHE_TTL=120
 
 MONGO_URI=mongodb://mongo:27017
 ```
-
 Be sure to replace the placeholders with actual values when deploying or running the application in your local environment.
-
----
-
-
 ## Start Redis
-```brew services start redis```
-
+``` bash
+brew services start redis
+```
 ## Test Redis
-```redis-cli -h localhost -p 6379 ping```
-
-## Install Bittensor (Downgrade Fast API to 0.110.1 for compatibility)
-```uv add "bittensor @ git+https://github.com/opentensor/bittensor```
-
+``` bash
+redis-cli -h localhost -p 6379 ping
+```
+## Install Bittensor (Downgrade FastAPI to 0.110.1 for compatibility)
+``` bash
+uv add "bittensor @ git+https://github.com/opentensor/bittensor"
+```
 ## Install BitTensor CLI
-```pip install bittensor-cli==9.1.0```
-
+``` bash
+pip install bittensor-cli==9.1.0
+```
 ## Create a New Wallet
-```btcli wallet new_coldkey --wallet.name default```
-
+``` bash
+btcli wallet new_coldkey --wallet.name default
+```
 ## Install Pytest
-```uv add pytest pytest-asyncio httpx```
-
+``` bash
+uv add pytest pytest-asyncio httpx
+```
 ## Run via Docker
-```docker compose up --build```
-
-## Test Main Endpoint
-```cd app```
-```pytest -v```
-
-## Check celery logs
-```celery worker --loglevel=debug```
-
-## Check Docker worker logs
-```docker compose logs worker```
-
-## Query the MongoDB 
-
+``` bash
+docker compose up --build
+```
+## Test Main Endpoint (1000 simultaneous requests)
+Navigate into the `app` directory and run pytest:
+``` bash
+cd app
+```
+Run tests:
+``` bash
+pytest -v
+```
+## Test via Postman Collection
+At the root of the project, there is a Postman collection to trigger the main endpoint:
+``` bash
+requests.postman_collection.json
+```
+## Check Celery Logs
+``` bash
+celery worker --loglevel=debug
+```
+## Check Docker Worker Logs
+``` bash
+docker compose logs worker
+```
+## Query the MongoDB
 ### Install mongosh
-```uv add mongosh```
+``` bash
+uv add mongosh
+```
 ### Run mongosh
-```mongosh```
+``` bash
+mongosh
+```
 ### Change the Database
-```use db```
+``` bash
+use db
+```
 ### Query the sentiment_collection
-```db.sentiment_collection.find()```
+``` bash
+db.sentiment_collection.find()
+```
+

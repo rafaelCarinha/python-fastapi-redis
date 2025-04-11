@@ -12,12 +12,10 @@ from bittensor_wallet.utils import SS58_FORMAT
 from dotenv import load_dotenv
 from typing import Dict, List, Tuple, Optional
 
-
 import os
 
 # Load environment variables from the .env file
 load_dotenv()
-
 
 # Configure logging
 logging.basicConfig(
@@ -208,7 +206,6 @@ def extract_netuid_and_dividend(value) -> Tuple[Optional[int], int]:
         return None, 0
 
 
-
 async def fetch_all_hotkeys_for_netuid(netuid: int):
     """
     Fetch tao dividends for all hotkeys under a specific netuid.
@@ -238,6 +235,7 @@ async def fetch_all_hotkeys_for_netuid(netuid: int):
 
     return results
 
+
 # Function to stake Tao
 def stake_tao(hotkey: str, netuid: int, amount: float):
     """Async function to stake Tao for a specific hotkey and netuid."""
@@ -255,14 +253,14 @@ def stake_tao(hotkey: str, netuid: int, amount: float):
         subtensor = Subtensor(network="wss://entrypoint-finney.opentensor.ai:443")
         # Perform the async staking operation
         result = subtensor.add_stake(
-            wallet= wallet,
+            wallet=wallet,
             netuid=netuid,
             hotkey_ss58=hotkey,
             amount=amount,
-            wait_for_inclusion= True,
-            wait_for_finalization= False,
-            safe_staking= False,
-            allow_partial_stake = False,
+            wait_for_inclusion=True,
+            wait_for_finalization=False,
+            safe_staking=False,
+            allow_partial_stake=False,
         )
         logger.info(f"Successfully staked Tao: {amount} for hotkey: {hotkey} on netuid: {netuid}")
         return result
@@ -288,14 +286,14 @@ def unstake_tao(hotkey: str, netuid: int, amount: float):
         subtensor = Subtensor(network="wss://entrypoint-finney.opentensor.ai:443")
         # Perform the async unstaking operation
         result = subtensor.unstake(
-            wallet= wallet,
+            wallet=wallet,
             netuid=netuid,
             hotkey_ss58=hotkey,
             amount=amount,
-            wait_for_inclusion= True,
-            wait_for_finalization= False,
-            safe_staking= False,
-            allow_partial_stake = False,
+            wait_for_inclusion=True,
+            wait_for_finalization=False,
+            safe_staking=False,
+            allow_partial_stake=False,
         )
         logger.info(f"Successfully unstaked Tao: {amount} for hotkey: {hotkey} on netuid: {netuid}")
         return result

@@ -11,7 +11,6 @@ from app.db.mongo_persistence import persist_request_data
 from dotenv import load_dotenv
 import logging
 
-
 load_dotenv()
 
 # Configure logging
@@ -20,7 +19,6 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
 
 # Initialize FastAPI application
 app = FastAPI(title="Asynchronous Dividends API")
@@ -32,11 +30,6 @@ redis_client = Redis(
 # Bearer token authentication
 security = HTTPBearer()
 
-
-@app.get("/")
-async def root():
-    logger.info("Hello World Test")
-    return {"message": "Hello World Test"}
 
 @app.get("/api/v1/tao_dividends")
 async def tao_dividends(
@@ -103,7 +96,8 @@ async def tao_dividends(
                 "Trade flag is True. Triggering sentiment analysis task for netuid=%s, hotkey=%s.",
                 netuid, hotkey,
             )
-            task = celery_app.send_task("app.services.sentiment_based_staking_task.analyze_sentiment_and_execute", args=(netuid, hotkey))
+            task = celery_app.send_task("app.services.sentiment_based_staking_task.analyze_sentiment_and_execute",
+                                        args=(netuid, hotkey))
             logger.info("Sentiment analysis task successfully triggered. Task ID: %s", task.id)
 
             return {"cached": False, "data": dividends, "task_id": task.id}

@@ -49,7 +49,6 @@ def analyze_sentiment(netuid: int):
         logger.error("Error fetching tweets from Datura.ai for NetUID: %d. Error: %s", netuid, str(e))
         return 0
 
-
     # Analyze sentiment with Chutes.ai
     """Send a list of tweets for sentiment analysis to Chutes.ai."""
     chutes_api_key = os.environ.get("CHUTES_API_KEY")

@@ -9,6 +9,7 @@ RUN pip install fastapi uvicorn
 RUN pip install celery[redis]
 RUN pip install bittensor
 RUN pip install python-dotenv
+RUN pip install motor
 
 COPY . .
 

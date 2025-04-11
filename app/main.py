@@ -1,13 +1,12 @@
 # Updated imports
-from fastapi import FastAPI, HTTPException, Depends, Query
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from redis import Redis
-from celery.result import AsyncResult
 import os
-import json
-from  app.services.sentiment_based_staking_task import celery_app
+from app.task.sentiment_based_staking_task import celery_app
 from app.services.tao_staking_service import fetch_tao_dividends, fetch_all_netuids, fetch_all_hotkeys_for_netuid
-from app.services.cache_utilities import get_cached_data, set_cache
+from app.util.cache_utilities import get_cached_data, set_cache
+from app.db.mongo_persistence import persist_request_data
 
 from dotenv import load_dotenv
 import logging
@@ -38,6 +37,7 @@ security = HTTPBearer()
 async def root():
     logger.info("Hello World Test")
     return {"message": "Hello World Test"}
+
 @app.get("/api/v1/tao_dividends")
 async def tao_dividends(
         netuid: int | None = None,
@@ -50,7 +50,19 @@ async def tao_dividends(
     if token.credentials != os.environ.get("AUTH_TOKEN"):
         raise HTTPException(status_code=401, detail="Invalid or missing token")
 
+    request_log_data = {
+        "endpoint": "/api/v1/tao_dividends",
+        "netuid": netuid,
+        "hotkey": hotkey,
+        "trade": trade,
+        "method": "GET"
+    }
+
     try:
+        # Persist request details asynchronously to MongoDB
+        persisted_request_id = await persist_request_data(request_log_data)
+        logger.info("Request details persisted successfully with ID: %s", persisted_request_id)
+
         # Case 1: netuid is omitted, fetch all netuids and their hotkeys
         if netuid is None:
             logger.info("No netuid specified. Retrieving dividends for all netuids and hotkeys.")
